@@ -205,6 +205,24 @@ impl Display for CustomError {
     }
 }
 
+impl From<hyper::http::Error> for CustomError {
+    fn from(err: hyper::http::Error) -> Self {
+        Self::new(err.to_string().as_str())
+    }
+}
+
+impl From<InvalidHeaderValue> for CustomError {
+    fn from(_: InvalidHeaderValue) -> Self {
+        Self::new("InvalidHeaderValue")
+    }
+}
+
+impl From<Error> for CustomError {
+    fn from(err: Error) -> Self {
+        Self::new(format!("Internal error: {}", err).as_str())
+    }
+}
+
 #[derive(Debug)]
 pub(super) enum Kind {
     CustomError(CustomError),
@@ -316,6 +334,12 @@ impl From<Utf8Error> for Error {
 impl From<serde_json::Error> for Error {
     fn from(err: serde_json::Error) -> Self {
         Error::new(Kind::SerdeJsonError(err))
+    }
+}
+
+impl From<CustomError> for Error {
+    fn from(err: CustomError) -> Self {
+        Error::new(Kind::CustomError(err))
     }
 }
 
