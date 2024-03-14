@@ -59,8 +59,7 @@ impl HTTPClient for Client {
     where
         T: serde::de::DeserializeOwned + std::fmt::Debug,
     {
-        let api_key: &String = &self.api_key;
-
+        let api_key = &self.api_key;
         let method = match method {
             "GET" => GET,
             "POST" => POST,
@@ -69,9 +68,7 @@ impl HTTPClient for Client {
             &_ => GET,
         };
 
-        let resp = retry_with_backoff(self, &method, &api_key[..], endpoint, params, body).await;
-
-        match resp {
+        match retry_with_backoff(self, &method, api_key.as_str(), endpoint, params, body).await {
             Ok(resp_body) => {
                 let status = resp_body.status();
 
@@ -91,10 +88,7 @@ impl HTTPClient for Client {
                     .and_then(|data| {
                         let json = data.0;
                         let bytes = std::str::from_utf8(&data.1)?;
-                        let json_raw: Value = dbg!(serde_json::from_str(bytes)?);
-
-                        dbg!(&json);
-                        dbg!(&json_raw);
+                        let json_raw: Value = serde_json::from_str(bytes)?;
 
                         match status {
                             StatusCode::OK => {}
@@ -116,8 +110,6 @@ impl HTTPClient for Client {
                     })?;
                 let decoded = data.0?;
                 let raw_json = data.1;
-
-                dbg!(&decoded);
 
                 Ok((decoded, raw_json))
             }
@@ -187,7 +179,7 @@ impl ops::Deref for RetryErrors<'_> {
     }
 }
 
-/// Attempt exponential backoff when re-attempting requests to the Melissa service.
+/// Attempt exponential backoff when re-attempting requests.
 async fn retry_with_backoff<'a>(
     client: &Client,
     method: &hyper::Method,
