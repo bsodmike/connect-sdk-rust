@@ -9,7 +9,7 @@ use hyper::{
     Response, StatusCode,
 };
 use hyper_rustls::HttpsConnector;
-use log::{debug};
+use log::debug;
 use serde_json::Value;
 use std::{error::Error as StdError, fmt, ops, thread, time::Duration};
 
