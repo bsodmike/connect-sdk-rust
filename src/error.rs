@@ -67,6 +67,8 @@ impl Error {
         self
     }
 
+    #[allow(dead_code)]
+
     pub(crate) fn find_source<E: StdError + 'static>(&self) -> Option<&E> {
         let mut cause = self.source();
         while let Some(err) = cause {
@@ -76,7 +78,6 @@ impl Error {
             cause = err.source();
         }
 
-        // else
         None
     }
 
@@ -88,6 +89,7 @@ impl Error {
         Error::new(Kind::ParsingError).with(cause)
     }
 
+    #[allow(dead_code)]
     pub(super) fn new_retry_error<E: Into<Cause>>(cause: E) -> Self {
         Error::new(Kind::RetryError).with(cause)
     }
@@ -223,6 +225,7 @@ impl From<Error> for CustomError {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub(super) enum Kind {
     CustomError(CustomError),
@@ -344,6 +347,7 @@ impl From<CustomError> for Error {
 }
 
 /// Defines an error from the 1Password Connect API
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct OPError {
     pub(super) status_code: Option<u16>,

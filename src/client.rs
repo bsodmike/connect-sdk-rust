@@ -1,6 +1,6 @@
 //! HTTP Client
 
-use crate::error::{self, CustomError, Error, RequestNotSuccessful};
+use crate::error::{CustomError, Error, RequestNotSuccessful};
 use async_trait::async_trait;
 use dotenv::dotenv;
 use exponential_backoff::Backoff;
@@ -9,7 +9,7 @@ use hyper::{
     Response, StatusCode,
 };
 use hyper_rustls::HttpsConnector;
-use log::{debug, error};
+use log::{debug};
 use serde_json::Value;
 use std::{error::Error as StdError, fmt, ops, thread, time::Duration};
 

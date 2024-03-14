@@ -4,7 +4,6 @@ use crate::error::{ConnectAPIError, Error};
 use crate::{
     client::HTTPClient,
     models::{StatusWrapper, VaultData},
-    *,
 };
 
 /// Get all known vaults
@@ -87,7 +86,9 @@ pub async fn get(
 
 #[cfg(test)]
 mod test {
+    #[allow(unused_imports)]
     use super::*;
+    use crate::{get_test_client, vaults};
     use tokio::test;
 
     #[test]

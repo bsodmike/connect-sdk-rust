@@ -4,12 +4,11 @@ use crate::error::{ConnectAPIError, Error};
 use crate::{
     client::HTTPClient,
     models::{
-        item::{FullItem, ItemBuilder, ItemData, LoginItem},
+        item::{FullItem, ItemData},
         StatusWrapper,
     },
-    *,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 /// Get all items
 pub async fn all(
@@ -162,6 +161,7 @@ pub async fn remove(
     Ok(())
 }
 
+#[allow(dead_code)]
 const SLEEP_DELAY: u64 = 4; // seconds
 
 #[cfg(test)]

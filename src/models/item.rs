@@ -1,10 +1,6 @@
-use std::ascii::AsciiExt;
-
-use crate::error::{CustomError, Error};
+use crate::error::CustomError;
 use chrono::{DateTime, Utc};
-use hyper::StatusCode;
-use log::debug;
-use regex::Regex;
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -206,6 +202,7 @@ pub enum ItemCategory {
 }
 
 impl ItemCategory {
+    #[allow(dead_code)]
     fn default() -> Self {
         Self::ApiCredential
     }
@@ -242,6 +239,7 @@ impl ItemBuilder {
         }
     }
 
+    #[allow(dead_code)]
     // FIXME: This needs testing to ensure the OTP secret is applied correctly
     pub(crate) fn add_otp(mut self, secret: &str) -> Self {
         let section = SectionID::new();
