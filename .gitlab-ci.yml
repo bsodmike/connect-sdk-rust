@@ -1,6 +1,9 @@
 image: docker:24.0.5-dind
 
 variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: tcp://docker:2375
   OP_API_TOKEN: $OP_API_TOKEN
   OP_TESTING_VAULT_ID: $OP_TESTING_VAULT_ID
   NIGHTLY_TOOLCHAIN: nightly-2024-02-22-x86_64-unknown-linux-gnu
@@ -9,7 +12,11 @@ default:
   before_script:
     - rustup component add rustfmt
   services:
-    - docker:24.0.5-dind
+    - name: docker:24.0.5-dind
+      alias: docker
+      entrypoint: ["env", "-u", "DOCKER_HOST"]
+      command: ["dockerd-entrypoint.sh"]
+
 
 stages:          # List of stages for jobs, and their order of execution
   - test
