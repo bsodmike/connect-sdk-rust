@@ -32,9 +32,12 @@ build-release:       # This job runs in the build stage, which runs first.
 tests:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   tags:
-    - tests  
+    - tests
+  before_script:
+    - curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    - chmod +x /usr/local/bin/docker-compose
   script:
-    - docker compose up -d
+    - /usr/local/bin/docker-compose up -d
     - echo "Running unit tests..."
     - cargo t --doc
 
