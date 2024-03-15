@@ -38,7 +38,7 @@ build-release:       # This job runs in the build stage, which runs first.
     - cargo build --release
 
 tests:   # This job runs in the test stage.
-  image: registry.gitlab.intranet:5050/product-research-and-development/devop/aws/automation/base-images/docker-image:latest
+  image: registry.gitlab.intranet:5050/product-research-and-development/devop/aws/automation/base-images/docker-image:master
   stage: test    # It only starts when the job in the build stage completes successfully.
   tags:
     - tests
