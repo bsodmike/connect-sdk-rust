@@ -1,7 +1,6 @@
 //! Error and Result module.
 
 use hyper::{header::InvalidHeaderValue, StatusCode};
-use log::log;
 use regex::Regex;
 use std::{
     error::Error as StdError,
