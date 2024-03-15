@@ -37,7 +37,7 @@ build-release:       # This job runs in the build stage, which runs first.
     - cargo build --release
 
 tests:   # This job runs in the test stage.
-  # image: docker:dind
+  image: docker:latest
   stage: test    # It only starts when the job in the build stage completes successfully.
   tags:
     - tests
@@ -45,7 +45,7 @@ tests:   # This job runs in the test stage.
     - docker --version || echo 'Docker CLI not found'
     - which dockerd || echo 'Docker daemon not found'
     - service docker status || echo 'Docker service status check failed'
-    # - ls -lah /var/run/docker.sock || echo 'Cannot access Docker socket'
+    - ls -lah /var/run/docker.sock || echo 'Cannot access Docker socket'
     # - dockerd --version || echo 'Docker daemon version command failed'
     # - dockerd&
     # - sleep 10  # Give time for the Docker daemon to start
@@ -56,6 +56,7 @@ tests:   # This job runs in the test stage.
     - export OP_SERVER_URL=$OP_SERVER_URL
   script:
     - /usr/local/bin/docker-compose up
+    - docker ps
     - echo "Running unit tests..."
     - cargo t
 
