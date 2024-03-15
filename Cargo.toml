@@ -1,6 +1,6 @@
 [package]
 name = "connect-1password"
-version = "2.0.2"
+version = "3.0.0"
 description = "Rust SDK for 1Password Connect"
 readme = "README.md"
 homepage = "https://github.com/bsodmike/connect-1password"
