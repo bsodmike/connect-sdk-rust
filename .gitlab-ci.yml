@@ -6,7 +6,7 @@ variables:
   OP_TESTING_VAULT_ID: $OP_TESTING_VAULT_ID
   OP_SERVER_URL: http://op-connect-api:8080
   NIGHTLY_TOOLCHAIN: nightly-2024-02-22-x86_64-unknown-linux-gnu
-  1PASSWORD_CREDENTIALS: $1PASSWORD_CREDENTIALS
+  OP_CONNECT_API_CREDENTIALS: $OP_CONNECT_API_CREDENTIALS
 
 default:
   before_script:
@@ -43,7 +43,7 @@ tests:   # This job runs in the test stage.
   tags:
     - tests
   before_script:
-    - echo "$1PASSWORD_CREDENTIALS" > ~/.1password-credentials.json
+    - echo "$OP_CONNECT_API_CREDENTIALS" > ~/.1password-credentials.json
     - docker --version || echo 'Docker CLI not found'
     - which dockerd || echo 'Docker daemon not found'
     - service docker status || echo 'Docker service status check failed'
