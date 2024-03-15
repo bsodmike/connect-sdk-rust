@@ -1,3 +1,10 @@
+before_script:
+  - docker --version || echo 'Docker CLI not found'
+  - which dockerd || echo 'Docker daemon not found'
+  - service docker status || echo 'Docker service status check failed'
+  - ls -lah /var/run/docker.sock || echo 'Cannot access Docker socket'
+  - dockerd --version || echo 'Docker daemon version command failed'
+
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
@@ -10,7 +17,7 @@ default:
   before_script:
     - rustup component add rustfmt
   services:
-    - name: docker:24.0.5-dind
+    - name: docker:dind
       alias: docker
       entrypoint: ["env", "-u", "DOCKER_HOST"]
       command: ["dockerd-entrypoint.sh"]
@@ -36,6 +43,7 @@ build-release:       # This job runs in the build stage, which runs first.
     - cargo build --release
 
 tests:   # This job runs in the test stage.
+  image: docker:dind
   stage: test    # It only starts when the job in the build stage completes successfully.
   tags:
     - tests
