@@ -44,7 +44,7 @@ tests:   # This job runs in the test stage.
     - tests
   before_script:
     # - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker login registry.gitlab.intranet:5050 -u bsodmike --password-stdin <<<$TOKEN
+    - docker login registry.gitlab.intranet:5050 -u bsodmike -p $TOKEN
     - echo "$OP_CONNECT_API_CREDENTIALS" > ~/.1password-credentials.json
     - docker --version || echo 'Docker CLI not found'
     - which dockerd || echo 'Docker daemon not found'
