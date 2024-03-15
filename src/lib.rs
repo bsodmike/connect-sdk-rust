@@ -98,7 +98,7 @@
 //!     tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
 //!
 //!     let (item, _) = items::get(&client, &vaults[0].id, &new_item.id).await?;
-//!     let fields: Vec<_> = item.fields.into_iter().filter(|r| r.value.is_some()).collect()
+//!     let fields: Vec<_> = item.fields.into_iter().filter(|r| r.value.is_some()).collect();
 //!     assert_eq!(fields.len(), 1);
 //!
 //!     let default_value = "".to_string();
@@ -151,7 +151,7 @@
 //!
 //!     let client = Client::default();
 //!     let (item, _) = items::get(&client, &vaults[0].id, &new_item.id).await?;
-//!     let fields: Vec<_> = item.fields.into_iter().filter(|r| r.value.is_some()).collect()
+//!     let fields: Vec<_> = item.fields.into_iter().filter(|r| r.value.is_some()).collect();
 //!     assert_eq!(fields.len(), 1);
 //!
 //!     let default_value = "".to_string();
