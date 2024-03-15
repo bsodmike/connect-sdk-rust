@@ -50,10 +50,12 @@ tests:   # This job runs in the test stage.
     - sleep 10  # Give time for the Docker daemon to start
     - curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     - chmod +x /usr/local/bin/docker-compose
+    - export OP_API_TOKEN=$OP_API_TOKEN
+    - export OP_TESTING_VAULT_ID=$OP_TESTING_VAULT_ID
   script:
     - /usr/local/bin/docker-compose up -d
     - echo "Running unit tests..."
-    - cargo t --doc
+    - cargo t
 
 formatting:
   stage: linting
