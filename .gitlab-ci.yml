@@ -1,0 +1,60 @@
+variables:
+  TOKEN: ""
+
+# default:
+#   services:
+#     - docker:24.0.5-dind
+
+stages:          # List of stages for jobs, and their order of execution
+  - build
+  - test
+  - deploy
+
+build-debug:       # This job runs in the build stage, which runs first.
+  stage: build
+  tags:
+    - quick
+  script:
+    - echo "Compiling the code..."
+    - cargo build --verbose
+
+build-release:       # This job runs in the build stage, which runs first.
+  script:
+    - echo "Compiling the code..."
+    - cargo build --release --verbose
+
+tests:   # This job runs in the test stage.
+  stage: test    # It only starts when the job in the build stage completes successfully.
+  tags:
+    - tests  
+  script:
+    - echo "Running unit tests..."
+    - cargo t --doc
+
+formatting:
+  stage: test
+  tags:
+    - linting
+  script:
+    - echo "Compiling debug build..."
+    - cargo build --verbose
+    - echo "Linting code..."
+    - cargo fmt -- --check
+
+clippy:
+  stage: test
+  tags:
+    - linting
+  script:
+    - echo "Compiling debug build..."
+    - cargo build --verbose
+    - rustup component add clippy --toolchain nightly-2024-02-22-x86_64-unknown-linux-gnu
+    - echo "Checking clippy offenses..."
+    - cargo clippy --all -- -D warnings
+
+# deploy-job:      # This job runs in the deploy stage.
+#   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
+#   environment: production
+#   script:
+#     - echo "Deploying application..."
+#     - echo "Application successfully deployed."
