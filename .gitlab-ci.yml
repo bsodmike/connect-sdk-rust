@@ -43,7 +43,7 @@ tests:   # This job runs in the test stage.
   tags:
     - tests
   before_script:
-    - echo "" > ~/.1password-credentials.json
+    - echo "$1PASSWORD_CREDENTIALS" > ~/.1password-credentials.json
     - docker --version || echo 'Docker CLI not found'
     - which dockerd || echo 'Docker daemon not found'
     - service docker status || echo 'Docker service status check failed'
