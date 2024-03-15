@@ -14,8 +14,8 @@ pub struct StatusWrapper {
     pub(crate) status: u16,
 }
 
-impl Into<String> for StatusWrapper {
-    fn into(self) -> String {
-        self.status.to_string()
+impl From<StatusWrapper> for String {
+    fn from(val: StatusWrapper) -> Self {
+        val.status.to_string()
     }
 }

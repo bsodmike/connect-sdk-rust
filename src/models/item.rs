@@ -71,10 +71,10 @@ pub enum FieldType {
     Concealed,
 }
 
-impl Into<String> for FieldType {
-    fn into(self) -> String {
-        let value = match self {
-            Self::Concealed => "CONCEALED",
+impl From<FieldType> for String {
+    fn from(val: FieldType) -> Self {
+        let value = match val {
+            FieldType::Concealed => "CONCEALED",
         };
 
         value.to_string()
@@ -208,12 +208,12 @@ impl ItemCategory {
     }
 }
 
-impl Into<String> for ItemCategory {
-    fn into(self) -> String {
-        let value = match self {
-            Self::ApiCredential => "API_CREDENTIAL",
-            Self::Login => "LOGIN",
-            Self::Password => "PASSWORD",
+impl From<ItemCategory> for String {
+    fn from(val: ItemCategory) -> Self {
+        let value = match val {
+            ItemCategory::ApiCredential => "API_CREDENTIAL",
+            ItemCategory::Login => "LOGIN",
+            ItemCategory::Password => "PASSWORD",
         };
 
         value.to_string()
@@ -300,7 +300,7 @@ impl LoginItem for ItemBuilder {
         let field: FieldObject = FieldObject {
             value: password.is_empty().then(|| password.to_string()),
             purpose: Some("PASSWORD".to_string()),
-            generate: password.is_empty().then(|| true),
+            generate: password.is_empty().then_some(true),
             label: None,
             r#type: None,
             section: None,
