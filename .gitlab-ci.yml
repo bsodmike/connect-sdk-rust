@@ -38,11 +38,12 @@ build-release:       # This job runs in the build stage, which runs first.
     - cargo build --release
 
 tests:   # This job runs in the test stage.
-  image: docker:latest
+  image: registry.gitlab.intranet:5050/product-research-and-development/devop/aws/automation/base-images/docker-image:latest
   stage: test    # It only starts when the job in the build stage completes successfully.
   tags:
     - tests
   before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
     - echo "$OP_CONNECT_API_CREDENTIALS" > ~/.1password-credentials.json
     - docker --version || echo 'Docker CLI not found'
     - which dockerd || echo 'Docker daemon not found'
