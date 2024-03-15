@@ -6,8 +6,8 @@ variables:
 default:
   before_script:
     - rustup component add rustfmt
-#   services:
-#     - docker:24.0.5-dind
+  services:
+    - docker:24.0.5-dind
 
 stages:          # List of stages for jobs, and their order of execution
   - test
@@ -34,6 +34,7 @@ tests:   # This job runs in the test stage.
   tags:
     - tests  
   script:
+    - docker compose up -d
     - echo "Running unit tests..."
     - cargo t --doc
 
