@@ -1,6 +1,7 @@
 variables:
   OP_API_TOKEN: $OP_API_TOKEN
   OP_TESTING_VAULT_ID: $OP_TESTING_VAULT_ID
+  NIGHTLY_TOOLCHAIN: nightly-2024-02-22-x86_64-unknown-linux-gnu
 
 default:
   before_script:
@@ -51,9 +52,8 @@ clippy:
   tags:
     - linting
   script:
-    - echo "Compiling debug build..."
-    - cargo build --verbose
-    - rustup component add clippy --toolchain nightly-2024-02-22-x86_64-unknown-linux-gnu
+    - rustup install $NIGHTLY_TOOLCHAIN
+    - rustup component add clippy --toolchain $NIGHTLY_TOOLCHAIN
     - echo "Checking clippy offenses..."
     - cargo clippy --all -- -D warnings
 
