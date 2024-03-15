@@ -1,5 +1,6 @@
 variables:
-  TOKEN: ""
+  OP_API_TOKEN: $OP_API_TOKEN
+  OP_TESTING_VAULT_ID: $OP_TESTING_VAULT_ID
 
 # default:
 #   services:

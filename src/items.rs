@@ -177,9 +177,7 @@ mod default {
 
     #[test]
     async fn all() {
-        let client = get_test_client();
-        let test_vault_id =
-            std::env::var("OP_TESTING_VAULT_ID").expect("1Password Vault ID for testing");
+        let (client, test_vault_id) = get_test_client();
 
         let (items, _) = items::all(&client, &test_vault_id).await.unwrap();
         dbg!(&items);
@@ -189,9 +187,7 @@ mod default {
 
     #[test]
     async fn add_item() {
-        let test_vault_id =
-            std::env::var("OP_TESTING_VAULT_ID").expect("1Password Vault ID for testing");
-        let client = get_test_client();
+        let (client, test_vault_id) = get_test_client();
 
         let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::ApiCredential)
             .build()
@@ -222,9 +218,7 @@ mod login_item {
 
     #[test]
     async fn add_login_item() {
-        let test_vault_id =
-            std::env::var("OP_TESTING_VAULT_ID").expect("1Password Vault ID for testing");
-        let client = get_test_client();
+        let (client, test_vault_id) = get_test_client();
 
         let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::Login)
             .title("Test login item")
@@ -246,9 +240,7 @@ mod login_item {
 
     #[test]
     async fn add_login_item_with_otp() {
-        let test_vault_id =
-            std::env::var("OP_TESTING_VAULT_ID").expect("1Password Vault ID for testing");
-        let client = get_test_client();
+        let (client, test_vault_id) = get_test_client();
 
         let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::Login)
             .title("Test login item")
@@ -272,9 +264,7 @@ mod login_item {
     #[should_panic]
     #[test]
     async fn add_login_item_requires_title() {
-        let test_vault_id =
-            std::env::var("OP_TESTING_VAULT_ID").expect("1Password Vault ID for testing");
-        let client = get_test_client();
+        let (client, test_vault_id) = get_test_client();
 
         let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::Login)
             .username("Bob")
@@ -286,9 +276,7 @@ mod login_item {
 
     #[test]
     async fn remove_login_item() {
-        let test_vault_id =
-            std::env::var("OP_TESTING_VAULT_ID").expect("1Password Vault ID for testing");
-        let client = get_test_client();
+        let (client, test_vault_id) = get_test_client();
 
         let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::Login)
             .title("Test login item, will be removed")
@@ -325,9 +313,7 @@ mod api_credential_item {
 
     #[test]
     async fn get_item() {
-        let test_vault_id =
-            std::env::var("OP_TESTING_VAULT_ID").expect("1Password Vault ID for testing");
-        let client = get_test_client();
+        let (client, test_vault_id) = get_test_client();
 
         let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::ApiCredential)
             .api_key("lawyer-rottenborn", "Dell XYZ")
@@ -365,9 +351,7 @@ mod api_credential_item {
 
     #[test]
     async fn add_api_credential_item() {
-        let test_vault_id =
-            std::env::var("OP_TESTING_VAULT_ID").expect("1Password Vault ID for testing");
-        let client = get_test_client();
+        let (client, test_vault_id) = get_test_client();
 
         let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::ApiCredential)
             .api_key("", "Dell XYZ")

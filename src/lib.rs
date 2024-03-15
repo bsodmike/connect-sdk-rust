@@ -177,6 +177,12 @@ pub mod models;
 pub mod vaults;
 
 #[cfg(test)]
-fn get_test_client() -> client::Client {
-    client::Client::default()
+fn get_test_client() -> (client::Client, String) {
+    use dotenv::dotenv;
+    dotenv().ok();
+
+    let test_vault_id =
+        std::env::var("OP_TESTING_VAULT_ID").expect("1Password Vault ID for testing");
+
+    (client::Client::default(), test_vault_id)
 }

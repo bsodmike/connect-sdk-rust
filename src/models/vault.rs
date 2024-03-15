@@ -1,9 +1,6 @@
 use chrono::{DateTime, Utc};
 
-
-
-use serde::{Deserialize};
-
+use serde::Deserialize;
 
 /// Defines a Vault object
 #[derive(Debug, Deserialize, PartialEq)]
@@ -15,8 +12,10 @@ pub struct VaultData {
     /// The description of the vault.
     pub description: Option<String>,
     /// The version of the vault metadata.
+    #[serde(rename = "attributeVersion")]
     pub attribute_version: u32,
     /// The version of the vault contents.
+    #[serde(rename = "contentVersion")]
     pub content_version: u32,
     /// The type of vault.
     pub r#type: String,
