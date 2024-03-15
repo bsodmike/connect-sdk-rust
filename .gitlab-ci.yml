@@ -55,7 +55,7 @@ tests:   # This job runs in the test stage.
     - export OP_TESTING_VAULT_ID=$OP_TESTING_VAULT_ID
     - export OP_SERVER_URL=$OP_SERVER_URL
   script:
-    - /usr/local/bin/docker-compose up
+    - /usr/local/bin/docker-compose up -d
     - docker ps
     - echo "Running unit tests..."
     - cargo t
