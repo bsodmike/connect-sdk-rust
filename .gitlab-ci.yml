@@ -7,8 +7,9 @@ variables:
 #     - docker:24.0.5-dind
 
 stages:          # List of stages for jobs, and their order of execution
-  - build
   - test
+  - linting
+  - build
   - deploy
 
 build-debug:       # This job runs in the build stage, which runs first.
@@ -34,7 +35,7 @@ tests:   # This job runs in the test stage.
     - cargo t --doc
 
 formatting:
-  stage: test
+  stage: linting
   tags:
     - linting
   script:
@@ -44,7 +45,7 @@ formatting:
     - cargo fmt -- --check
 
 clippy:
-  stage: test
+  stage: linting
   tags:
     - linting
   script:
