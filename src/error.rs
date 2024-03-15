@@ -9,6 +9,9 @@ use std::{
     str::Utf8Error,
 };
 
+/// Wrapper Trait over [`std::error::Error`]
+pub trait ErrorTrait: std::error::Error {}
+
 /// A simple type alias so as to DRY.
 pub type ConnectResult<T> = Result<T, Error>;
 

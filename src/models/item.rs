@@ -1,4 +1,4 @@
-use crate::error::CustomError;
+use crate::error::{CustomError, ErrorTrait};
 use chrono::{DateTime, Utc};
 
 use serde::{Deserialize, Serialize};
@@ -146,7 +146,7 @@ pub struct FullItem {
 /// Defines a default interface
 pub trait DefaultItem {
     /// Execute the builder
-    fn build(&self) -> Result<FullItem, Box<dyn std::error::Error + Send + Sync>>;
+    fn build(&self) -> Result<FullItem, Box<dyn ErrorTrait + Send + Sync>>;
 }
 
 /// Defines an interface for a Login item
@@ -262,7 +262,7 @@ impl ItemBuilder {
 }
 
 impl DefaultItem for ItemBuilder {
-    fn build(&self) -> Result<FullItem, Box<dyn std::error::Error + Send + Sync>> {
+    fn build(&self) -> Result<FullItem, Box<dyn ErrorTrait + Send + Sync>> {
         Ok(FullItem {
             title: self.title.clone(),
             category: self.category.clone(),
