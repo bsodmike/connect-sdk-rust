@@ -73,37 +73,7 @@ tests:              # This job runs in the test stage.
     # - docker logs connect-1password-op-connect-api-1
     - 'curl -H "Accept: application/json" -H "Authorization: Bearer $OP_API_TOKEN" $OP_SERVER_URL/v1/vaults | jq'
     - echo "Running tests..."
-    - cargo t -- --test-threads 1 --skip items::run_isolated
-
-tests_isolated:              # This job runs in the test stage.
-  image: registry.gitlab.intranet:5050/product-research-and-development/devop/aws/automation/base-images/docker-image:master
-  stage: test
-  tags:
-    - tests
-  before_script:
-    - export OP_API_TOKEN=$OP_API_TOKEN
-    - export OP_TESTING_VAULT_ID=$OP_TESTING_VAULT_ID
-    - export OP_SERVER_URL=$OP_SERVER_URL
-    - export OP_CONNECT_API_CREDENTIALS=$OP_CONNECT_API_CREDENTIALS
-    - 'echo "Current dir: $CI_PROJECT_DIR"'
-    - echo "Creating $OP_CREDENTIALS_JSON"
-    - touch $OP_CREDENTIALS_JSON
-    - ls -la $CI_PROJECT_DIR
-    - echo $OP_CONNECT_API_CREDENTIALS > $OP_CREDENTIALS_JSON
-    - cat $OP_CREDENTIALS_JSON
-    - docker --version || echo 'Docker CLI not found'
-    - echo "Installing docker-compose"
-    - curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    - chmod +x /usr/local/bin/docker-compose
-    - . "$HOME/.cargo/env"
-  script:
-    - /usr/local/bin/docker-compose up -d
-    - sleep 2
-    - docker ps
-    # - docker logs connect-1password-op-connect-api-1
-    - 'curl -H "Accept: application/json" -H "Authorization: Bearer $OP_API_TOKEN" $OP_SERVER_URL/v1/vaults | jq'
-    - echo "Running tests..."
-    - cargo t items::run_isolated::all -- --exact
+    - cargo t -- --test-threads 1
 
 formatting:
   stage: linting

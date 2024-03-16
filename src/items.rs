@@ -165,215 +165,210 @@ pub async fn remove(
 const SLEEP_DELAY: u64 = 4; // seconds
 
 #[cfg(test)]
-mod default {
-    use super::SLEEP_DELAY;
-    use crate::get_test_client;
-    use tokio::test;
+mod tests {
+    use super::*;
 
-    use crate::{
-        items,
-        models::item::{DefaultItem, FullItem, ItemBuilder, ItemCategory},
-    };
+    mod default {
+        use super::SLEEP_DELAY;
+        use crate::get_test_client;
+        use tokio::test;
 
-    #[test]
-    async fn add_item() {
-        let (client, test_vault_id) = get_test_client();
+        use crate::{
+            items,
+            models::item::{DefaultItem, FullItem, ItemBuilder, ItemCategory},
+        };
 
-        let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::ApiCredential)
-            .build()
-            .unwrap();
-        let (new_item, _) = items::add(&client, item).await.unwrap();
-        dbg!(&new_item);
+        #[test]
+        async fn add_item() {
+            let (client, test_vault_id) = get_test_client();
 
-        assert_ne!(new_item.id, "foo");
+            let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::ApiCredential)
+                .build()
+                .unwrap();
+            let (new_item, _) = items::add(&client, item).await.unwrap();
+            dbg!(&new_item);
 
-        tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
+            assert_ne!(new_item.id, "foo");
 
-        items::remove(&client, &test_vault_id, &new_item.id)
-            .await
-            .unwrap();
+            tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
+
+            items::remove(&client, &test_vault_id, &new_item.id)
+                .await
+                .unwrap();
+        }
+
+        #[test]
+        async fn all() {
+            let (client, test_vault_id) = get_test_client();
+
+            let (items, _) = items::all(&client, &test_vault_id).await.unwrap();
+
+            if items.len() == 0 {
+                assert!(items.is_empty());
+            }
+        }
     }
-}
 
-#[cfg(test)]
-mod run_isolated {
-    use crate::get_test_client;
-    use crate::items;
-    use tokio::test;
+    mod login_item {
+        use super::SLEEP_DELAY;
+        use crate::get_test_client;
+        use tokio::test;
 
-    #[test]
-    async fn all() {
-        let (client, test_vault_id) = get_test_client();
+        use crate::{
+            items,
+            models::item::{FullItem, ItemBuilder, ItemCategory, LoginItem},
+        };
 
-        let (items, _) = items::all(&client, &test_vault_id).await.unwrap();
+        #[test]
+        async fn add_login_item() {
+            let (client, test_vault_id) = get_test_client();
 
-        if items.len() == 0 {
+            let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::Login)
+                .title("Test login item")
+                .username("Bob")
+                .password("")
+                .build()
+                .unwrap();
+            let (new_item, _) = items::add(&client, item).await.unwrap();
+            dbg!(&new_item);
+
+            assert_ne!(new_item.id, "foo");
+
+            tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
+
+            items::remove(&client, &test_vault_id, &new_item.id)
+                .await
+                .unwrap();
+        }
+
+        #[test]
+        async fn add_login_item_with_otp() {
+            let (client, test_vault_id) = get_test_client();
+
+            let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::Login)
+                .title("Test login item")
+                .username("Bob")
+                .password("")
+                .add_otp("replaceme")
+                .build()
+                .unwrap();
+            let (new_item, _) = items::add(&client, item).await.unwrap();
+            dbg!(&new_item);
+
+            assert_ne!(new_item.id, "foo");
+
+            tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
+
+            items::remove(&client, &test_vault_id, &new_item.id)
+                .await
+                .unwrap();
+        }
+
+        #[should_panic]
+        #[test]
+        async fn add_login_item_requires_title() {
+            let (client, test_vault_id) = get_test_client();
+
+            let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::Login)
+                .username("Bob")
+                .password("")
+                .build()
+                .unwrap();
+            let (_new_item, _) = items::add(&client, item).await.unwrap();
+        }
+
+        #[test]
+        async fn remove_login_item() {
+            let (client, test_vault_id) = get_test_client();
+
+            let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::Login)
+                .title("Test login item, will be removed")
+                .username("Bob")
+                .password("")
+                .build()
+                .unwrap();
+            let (new_item, _) = items::add(&client, item).await.unwrap();
+            dbg!(&new_item);
+
+            tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY + 2, 0)).await;
+
+            items::remove(&client, &test_vault_id, &new_item.id)
+                .await
+                .unwrap();
+
+            tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
+
+            let (items, _) = items::all(&client, &test_vault_id).await.unwrap();
             assert!(items.is_empty());
         }
     }
-}
 
-#[cfg(test)]
-mod login_item {
-    use super::SLEEP_DELAY;
-    use crate::get_test_client;
-    use tokio::test;
+    mod api_credential_item {
+        use super::SLEEP_DELAY;
+        use crate::get_test_client;
+        use tokio::test;
 
-    use crate::{
-        items,
-        models::item::{FullItem, ItemBuilder, ItemCategory, LoginItem},
-    };
+        use crate::{
+            items,
+            models::item::{ApiCredentialItem, FullItem, ItemBuilder, ItemCategory},
+        };
 
-    #[test]
-    async fn add_login_item() {
-        let (client, test_vault_id) = get_test_client();
+        #[test]
+        async fn get_item() {
+            let (client, test_vault_id) = get_test_client();
 
-        let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::Login)
-            .title("Test login item")
-            .username("Bob")
-            .password("")
-            .build()
-            .unwrap();
-        let (new_item, _) = items::add(&client, item).await.unwrap();
-        dbg!(&new_item);
+            let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::ApiCredential)
+                .api_key("lawyer-rottenborn", "Dell XYZ")
+                .build()
+                .unwrap();
+            let (new_item, _) = items::add(&client, item).await.unwrap();
+            assert_eq!(new_item.title, "Dell XYZ");
 
-        assert_ne!(new_item.id, "foo");
+            tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
 
-        tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
+            let (item, _) = items::get(&client, &test_vault_id, &new_item.id)
+                .await
+                .unwrap();
+            let fields: Vec<_> = item
+                .fields
+                .into_iter()
+                .filter(|r| r.value.is_some())
+                .collect();
+            assert_eq!(fields.len(), 1);
+            dbg!(&fields);
 
-        items::remove(&client, &test_vault_id, &new_item.id)
-            .await
-            .unwrap();
-    }
+            let default_value = "".to_string();
+            let api_value = fields[0].value.as_ref().unwrap_or(&default_value);
+            let field_type = fields[0].r#type.as_ref().unwrap_or(&default_value);
+            assert_eq!(field_type, "CONCEALED");
+            assert_eq!(api_value, "lawyer-rottenborn");
 
-    #[test]
-    async fn add_login_item_with_otp() {
-        let (client, test_vault_id) = get_test_client();
+            // Just as a clean up measure, we remove the item created in the this example
+            tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
 
-        let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::Login)
-            .title("Test login item")
-            .username("Bob")
-            .password("")
-            .add_otp("replaceme")
-            .build()
-            .unwrap();
-        let (new_item, _) = items::add(&client, item).await.unwrap();
-        dbg!(&new_item);
+            items::remove(&client, &test_vault_id, &new_item.id)
+                .await
+                .unwrap();
+        }
 
-        assert_ne!(new_item.id, "foo");
+        #[test]
+        async fn add_api_credential_item() {
+            let (client, test_vault_id) = get_test_client();
 
-        tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
+            let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::ApiCredential)
+                .api_key("", "Dell XYZ")
+                .build()
+                .unwrap();
+            let (new_item, _) = items::add(&client, item).await.unwrap();
+            dbg!(&new_item);
 
-        items::remove(&client, &test_vault_id, &new_item.id)
-            .await
-            .unwrap();
-    }
+            assert_ne!(new_item.id, "foo");
 
-    #[should_panic]
-    #[test]
-    async fn add_login_item_requires_title() {
-        let (client, test_vault_id) = get_test_client();
+            tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
 
-        let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::Login)
-            .username("Bob")
-            .password("")
-            .build()
-            .unwrap();
-        let (_new_item, _) = items::add(&client, item).await.unwrap();
-    }
-
-    #[test]
-    async fn remove_login_item() {
-        let (client, test_vault_id) = get_test_client();
-
-        let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::Login)
-            .title("Test login item, will be removed")
-            .username("Bob")
-            .password("")
-            .build()
-            .unwrap();
-        let (new_item, _) = items::add(&client, item).await.unwrap();
-        dbg!(&new_item);
-
-        tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY + 2, 0)).await;
-
-        items::remove(&client, &test_vault_id, &new_item.id)
-            .await
-            .unwrap();
-
-        tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
-
-        let (items, _) = items::all(&client, &test_vault_id).await.unwrap();
-        assert!(items.is_empty());
-    }
-}
-
-#[cfg(test)]
-mod api_credential_item {
-    use super::SLEEP_DELAY;
-    use crate::get_test_client;
-    use tokio::test;
-
-    use crate::{
-        items,
-        models::item::{ApiCredentialItem, FullItem, ItemBuilder, ItemCategory},
-    };
-
-    #[test]
-    async fn get_item() {
-        let (client, test_vault_id) = get_test_client();
-
-        let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::ApiCredential)
-            .api_key("lawyer-rottenborn", "Dell XYZ")
-            .build()
-            .unwrap();
-        let (new_item, _) = items::add(&client, item).await.unwrap();
-        assert_eq!(new_item.title, "Dell XYZ");
-
-        tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
-
-        let (item, _) = items::get(&client, &test_vault_id, &new_item.id)
-            .await
-            .unwrap();
-        let fields: Vec<_> = item
-            .fields
-            .into_iter()
-            .filter(|r| r.value.is_some())
-            .collect();
-        assert_eq!(fields.len(), 1);
-        dbg!(&fields);
-
-        let default_value = "".to_string();
-        let api_value = fields[0].value.as_ref().unwrap_or(&default_value);
-        let field_type = fields[0].r#type.as_ref().unwrap_or(&default_value);
-        assert_eq!(field_type, "CONCEALED");
-        assert_eq!(api_value, "lawyer-rottenborn");
-
-        // Just as a clean up measure, we remove the item created in the this example
-        tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
-
-        items::remove(&client, &test_vault_id, &new_item.id)
-            .await
-            .unwrap();
-    }
-
-    #[test]
-    async fn add_api_credential_item() {
-        let (client, test_vault_id) = get_test_client();
-
-        let item: FullItem = ItemBuilder::new(&test_vault_id, ItemCategory::ApiCredential)
-            .api_key("", "Dell XYZ")
-            .build()
-            .unwrap();
-        let (new_item, _) = items::add(&client, item).await.unwrap();
-        dbg!(&new_item);
-
-        assert_ne!(new_item.id, "foo");
-
-        tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
-
-        items::remove(&client, &test_vault_id, &new_item.id)
-            .await
-            .unwrap();
+            items::remove(&client, &test_vault_id, &new_item.id)
+                .await
+                .unwrap();
+        }
     }
 }
