@@ -73,9 +73,9 @@ tests:              # This job runs in the test stage.
     # - docker logs connect-1password-op-connect-api-1
     - 'curl -H "Accept: application/json" -H "Authorization: Bearer $OP_API_TOKEN" $OP_SERVER_URL/v1/vaults | jq'
     - echo "Running unit tests..."
-    - cargo t
+    - cargo t -- --test-threads 1
     - echo "Running doc tests..."
-    - cargo t --doc
+    - cargo t --doc -- --test-threads 1
 
 formatting:
   stage: linting
