@@ -93,6 +93,12 @@ clippy:
   stage: linting
   tags:
     - linting
+  before_script:
+    - echo "Instaling rustup..."
+    - curl https://sh.rustup.rs -sSf | sh -s -- -y
+    - . "$HOME/.cargo/env"
+    - rustup override set stable
+    - rustup component add clippy
   script:
     - rustup install $NIGHTLY_TOOLCHAIN
     - rustup component add clippy --toolchain $NIGHTLY_TOOLCHAIN
