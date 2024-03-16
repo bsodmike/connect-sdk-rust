@@ -49,7 +49,7 @@ tests:              # This job runs in the test stage.
   tags:
     - tests
   before_script:
-    - echo "$OP_CONNECT_API_CREDENTIALS" > ~/.1password-credentials.json
+    - echo $OP_CONNECT_API_CREDENTIALS > ~/.1password-credentials.json
     - cat ~/.1password-credentials.json
     - docker --version || echo 'Docker CLI not found'
     - curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
