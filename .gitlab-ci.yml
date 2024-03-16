@@ -49,6 +49,8 @@ tests:              # This job runs in the test stage.
   tags:
     - tests
   before_script:
+    - export OP_CONNECT_API_CREDENTIALS=$OP_CONNECT_API_CREDENTIALS
+    - echo $OP_CONNECT_API_CREDENTIALS
     - echo $OP_CONNECT_API_CREDENTIALS > ~/.1password-credentials.json
     - cat ~/.1password-credentials.json
     - docker --version || echo 'Docker CLI not found'
