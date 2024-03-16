@@ -69,7 +69,7 @@ tests:              # This job runs in the test stage.
     - . "$HOME/.cargo/env"
   script:
     - /usr/local/bin/docker-compose up -d
-    - sleep 10
+    - sleep 2
     - docker ps
     # - docker logs connect-1password-op-connect-api-1
     - 'curl -H "Accept: application/json" -H "Authorization: Bearer $OP_API_TOKEN" $OP_SERVER_URL/v1/vaults | jq'
