@@ -54,7 +54,7 @@ tests:              # This job runs in the test stage.
     - export OP_TESTING_VAULT_ID=$OP_TESTING_VAULT_ID
     - export OP_SERVER_URL=$OP_SERVER_URL
     - export OP_CONNECT_API_CREDENTIALS=$OP_CONNECT_API_CREDENTIALS
-    - 'echo "Current dir: `pwd`"'
+    - 'echo "Current dir: $CI_PROJECT_DIR"'
     - echo "Creating $OP_CREDENTIALS_JSON"
     - touch $OP_CREDENTIALS_JSON
     - ls -la $CI_PROJECT_DIR

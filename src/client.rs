@@ -118,6 +118,23 @@ impl HTTPClient for Client {
     }
 }
 
+/// Create an instance by fetching defaults from the host ENV.
+///
+/// # Fields
+///
+/// - `OP_API_TOKEN`: provide the 1Password Connect API token.
+/// - `OP_SERVER_URL`: provide full URL to the host server, i.e. `http://localhost:8080`
+impl Default for Client {
+    fn default() -> Self {
+        dotenv().ok();
+
+        let token = std::env::var("OP_API_TOKEN").expect("1Password API token expected!");
+        let host = std::env::var("OP_SERVER_URL").expect("1Password Connect server URL expected!");
+
+        Self::new(&token, &host)
+    }
+}
+
 impl Client {
     /// Create a new instance
     ///
@@ -140,21 +157,6 @@ impl Client {
         }
     }
 
-    /// Create an instance by fetching defaults from the host ENV.
-    ///
-    /// # Fields
-    ///
-    /// - `OP_API_TOKEN`: provide the 1Password Connect API token.
-    /// - `OP_SERVER_URL`: provide full URL to the host server, i.e. `http://localhost:8080`
-    pub fn default() -> Self {
-        dotenv().ok();
-
-        let token = std::env::var("OP_API_TOKEN").expect("1Password API token expected!");
-        let host = std::env::var("OP_SERVER_URL").expect("1Password Connect server URL expected!");
-
-        Client::new(&token, &host)
-    }
-
     /// Returns the 1Password Connect API token.
     pub fn token(&self) -> String {
         self.api_key.clone()
@@ -163,6 +165,7 @@ impl Client {
 
 struct RetryErrors<'a>(pub(crate) &'a mut Vec<String>);
 
+#[allow(clippy::manual_try_fold)]
 impl<'a> fmt::Display for RetryErrors<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.iter().fold(Ok(()), |result, error_msg| {
@@ -225,12 +228,12 @@ async fn retry_with_backoff<'a>(
         }
     }
 
-    let errors: Vec<&hyper::Error> = retry_errors.iter().map(|err| err).collect();
+    let errors: Vec<&hyper::Error> = retry_errors.iter().collect();
     let mut err_vec: Vec<String> = vec![];
     for (index, item) in errors.iter().enumerate() {
-        err_vec.push(format!("Error {}: {}", index, item.to_string()))
+        err_vec.push(format!("Error {}: {}", index, item))
     }
-    if err_vec.len() > 0 {
+    if !err_vec.is_empty() {
         let error_text = err_vec.join(", ");
         return Err::<Response<Body>, CustomError>(CustomError::new(error_text.as_str()));
     };
