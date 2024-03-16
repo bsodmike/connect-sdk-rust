@@ -15,7 +15,6 @@ default:
   before_script:
     - echo "Instaling rustup..."
     - curl https://sh.rustup.rs -sSf | sh -s -- -y
-    - . "$HOME/.cargo/env"
     - rustup override set stable
   services:
     - name: docker:dind
@@ -67,6 +66,7 @@ tests:              # This job runs in the test stage.
     - echo "Installing docker-compose"
     - curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     - chmod +x /usr/local/bin/docker-compose
+    - . "$HOME/.cargo/env"
   script:
     - /usr/local/bin/docker-compose up -d
     - sleep 10
@@ -96,6 +96,7 @@ clippy:
     - linting
   before_script:
     - rustup component add clippy
+    - . "/usr/local/cargo/env"
   script:
     - rustup install $NIGHTLY_TOOLCHAIN
     - rustup component add clippy --toolchain $NIGHTLY_TOOLCHAIN
