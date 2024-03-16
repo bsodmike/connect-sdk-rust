@@ -33,6 +33,9 @@ stages:             # List of stages for jobs, and their order of execution
 
 build-debug:        # This job runs in the build stage, which runs first.
   stage: build
+  needs:
+    - test
+    - linting
   tags:
     - quick
   script:
@@ -41,6 +44,9 @@ build-debug:        # This job runs in the build stage, which runs first.
 
 build-release:
   stage: build
+  needs:
+    - test
+    - linting
   script:
     - echo "Compiling the code..."
     - cargo build --release
@@ -100,9 +106,14 @@ clippy:
     - echo "Checking clippy offenses..."
     - cargo clippy --all -- -D warnings
 
-# deploy-job:      # This job runs in the deploy stage.
-#   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
-#   environment: production
-#   script:
-#     - echo "Deploying application..."
-#     - echo "Application successfully deployed."
+deploy-job:      # This job runs in the deploy stage.
+  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
+  needs:
+    - build
+  # environment: production
+  when: manual
+  script:
+    - echo "Deploying application..."
+    - exit 0
+    - echo "Application successfully deployed."
+
