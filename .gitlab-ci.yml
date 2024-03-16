@@ -62,8 +62,6 @@ tests:              # This job runs in the test stage.
     - rustup override set stable
   script:
     - /usr/local/bin/docker-compose up -d
-    - docker ps
-    - docker inspect connect-1password_op-connect-api_1 | grep -B3 -A20 "Networks"
     - echo "Running unit tests..."
     - cargo t
 
