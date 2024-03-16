@@ -49,8 +49,6 @@ tests:   # This job runs in the test stage.
   tags:
     - tests
   before_script:
-    # - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
-    # - docker login registry.gitlab.intranet:5050 -u bsodmike -p $TOKEN
     - echo "$OP_CONNECT_API_CREDENTIALS" > ~/.1password-credentials.json
     - docker --version || echo 'Docker CLI not found'
     - curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -58,6 +56,7 @@ tests:   # This job runs in the test stage.
     - export OP_API_TOKEN=$OP_API_TOKEN
     - export OP_TESTING_VAULT_ID=$OP_TESTING_VAULT_ID
     - export OP_SERVER_URL=$OP_SERVER_URL
+    - curl https://sh.rustup.rs -sSf | sh -s -- -y
     - rustup override set stable
   script:
     - /usr/local/bin/docker-compose up -d
