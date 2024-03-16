@@ -72,7 +72,7 @@ tests:              # This job runs in the test stage.
     - sleep 10
     - docker ps
     # - docker logs connect-1password-op-connect-api-1
-    - 'curl -H "Accept: application/json" -H "Authorization: Bearer $OP_API_TOKEN" $OP_SERVER_URL/v1/vaults'
+    - 'curl -H "Accept: application/json" -H "Authorization: Bearer $OP_API_TOKEN" $OP_SERVER_URL/v1/vaults | jq'
     - echo "Running unit tests..."
     - cargo t
     - echo "Running doc tests..."
