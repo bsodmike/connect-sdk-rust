@@ -110,10 +110,11 @@ deploy-job:      # This job runs in the deploy stage.
   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
   needs:
     - build
-  # environment: production
   when: manual
   script:
     - echo "Deploying application..."
     - exit 0
     - echo "Application successfully deployed."
+  # environment: production
+
 
