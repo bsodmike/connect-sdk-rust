@@ -8,7 +8,7 @@ variables:
   OP_CONNECT_API_CREDENTIALS: $OP_CONNECT_API_CREDENTIALS
   OP_SERVER_URL: http://docker:8080
   OP_CREDENTIALS_JSON: $CI_PROJECT_DIR/.1password-credentials.json
-  NIGHTLY_TOOLCHAIN: nightly-2024-02-22-x86_64-unknown-linux-gnu
+  NIGHTLY_TOOLCHAIN: nightly-2024-03-15-x86_64-unknown-linux-gnu
 
 default:
   before_script:
