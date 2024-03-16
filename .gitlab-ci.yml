@@ -6,8 +6,8 @@ variables:
   DOCKER_HOST: tcp://docker:2375
   OP_API_TOKEN: $OP_API_TOKEN
   OP_TESTING_VAULT_ID: $OP_TESTING_VAULT_ID
-  OP_SERVER_URL: http://docker:8080
   OP_CONNECT_API_CREDENTIALS: $OP_CONNECT_API_CREDENTIALS
+  OP_SERVER_URL: http://docker:8080
   NIGHTLY_TOOLCHAIN: nightly-2024-02-22-x86_64-unknown-linux-gnu
 
 default:
@@ -67,6 +67,7 @@ tests:              # This job runs in the test stage.
     - rustup override set stable
   script:
     - /usr/local/bin/docker-compose up -d
+    - sleep 10
     - 'curl -H "Accept: application/json" -H "Authorization: Bearer $OP_API_TOKEN" http://docker:8080/v1/vaults'
     - echo "Running unit tests..."
     - cargo t
