@@ -69,7 +69,7 @@ tests:              # This job runs in the test stage.
     - . "$HOME/.cargo/env"
     - rustup override set stable
   script:
-    - /usr/local/bin/docker-compose up
+    - /usr/local/bin/docker-compose up -d
     - sleep 10
     - 'curl -H "Accept: application/json" -H "Authorization: Bearer $OP_API_TOKEN" $OP_SERVER_URL/v1/vaults'
     - echo "Running unit tests..."
