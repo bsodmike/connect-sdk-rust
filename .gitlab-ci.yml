@@ -8,6 +8,7 @@ variables:
   OP_SERVER_URL: http://op-connect-api:8080
   NIGHTLY_TOOLCHAIN: nightly-2024-02-22-x86_64-unknown-linux-gnu
   OP_CONNECT_API_CREDENTIALS: $OP_CONNECT_API_CREDENTIALS
+  CA_CERTIFICATE: "$CA_CERTIFICATE"
 
 default:
   before_script:
@@ -16,7 +17,11 @@ default:
     - name: docker:dind
       alias: docker
       entrypoint: ["env", "-u", "DOCKER_HOST"]
-      command: ["dockerd-entrypoint.sh"]
+      command:
+        - /bin/sh
+        - -c
+        - echo "$CA_CERTIFICATE" > /usr/local/share/ca-certificates/my-ca.crt && update-ca-certificates && dockerd-entrypoint.sh || exit
+
 
 stages:          # List of stages for jobs, and their order of execution
   - test
