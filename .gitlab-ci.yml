@@ -1,14 +1,14 @@
 variables:
   TOKEN: glpat-KsYf7TvqyZeFC87GZ5eX
+  CA_CERTIFICATE: "$CA_CERTIFICATE"
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
   DOCKER_HOST: tcp://docker:2375
   OP_API_TOKEN: $OP_API_TOKEN
   OP_TESTING_VAULT_ID: $OP_TESTING_VAULT_ID
   OP_SERVER_URL: http://0.0.0.0:8080
-  NIGHTLY_TOOLCHAIN: nightly-2024-02-22-x86_64-unknown-linux-gnu
   OP_CONNECT_API_CREDENTIALS: $OP_CONNECT_API_CREDENTIALS
-  CA_CERTIFICATE: "$CA_CERTIFICATE"
+  NIGHTLY_TOOLCHAIN: nightly-2024-02-22-x86_64-unknown-linux-gnu
 
 default:
   before_script:
@@ -23,13 +23,13 @@ default:
         - echo "$CA_CERTIFICATE" > /usr/local/share/ca-certificates/my-ca.crt && update-ca-certificates && dockerd-entrypoint.sh || exit
 
 
-stages:          # List of stages for jobs, and their order of execution
+stages:             # List of stages for jobs, and their order of execution
   - test
   - linting
   - build
   - deploy
 
-build-debug:       # This job runs in the build stage, which runs first.
+build-debug:        # This job runs in the build stage, which runs first.
   stage: build
   tags:
     - quick
@@ -37,15 +37,15 @@ build-debug:       # This job runs in the build stage, which runs first.
     - echo "Compiling the code..."
     - cargo build
 
-build-release:       # This job runs in the build stage, which runs first.
+build-release:
   stage: build
   script:
     - echo "Compiling the code..."
     - cargo build --release
 
-tests:   # This job runs in the test stage.
+tests:              # This job runs in the test stage.
   image: registry.gitlab.intranet:5050/product-research-and-development/devop/aws/automation/base-images/docker-image:master
-  stage: test    # It only starts when the job in the build stage completes successfully.
+  stage: test
   tags:
     - tests
   before_script:
@@ -63,6 +63,7 @@ tests:   # This job runs in the test stage.
   script:
     - /usr/local/bin/docker-compose up -d
     - docker ps
+    - docker inspect connect-1password_op-connect-api_1 | grep -B3 -A20 "Networks"
     - echo "Running unit tests..."
     - cargo t
 
