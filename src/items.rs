@@ -176,16 +176,6 @@ mod default {
     };
 
     #[test]
-    async fn all() {
-        let (client, test_vault_id) = get_test_client();
-
-        let (items, _) = items::all(&client, &test_vault_id).await.unwrap();
-        dbg!(&items);
-
-        assert!(items.is_empty());
-    }
-
-    #[test]
     async fn add_item() {
         let (client, test_vault_id) = get_test_client();
 
@@ -202,6 +192,23 @@ mod default {
         items::remove(&client, &test_vault_id, &new_item.id)
             .await
             .unwrap();
+    }
+}
+
+#[cfg(test)]
+mod run_isolated {
+    use crate::get_test_client;
+    use crate::items;
+    use tokio::test;
+
+    #[test]
+    async fn all() {
+        let (client, test_vault_id) = get_test_client();
+
+        let (items, _) = items::all(&client, &test_vault_id).await.unwrap();
+        dbg!(&items);
+
+        assert!(items.is_empty());
     }
 }
 
