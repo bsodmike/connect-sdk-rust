@@ -11,9 +11,9 @@ The library can be used by Rust applications, tools, and other automations to ac
 
 ## Usage
 
-1. Start by copying `.env-sample` to `.env`, making sure to update its values.
-2. Follow the [instructions to start Connect](https://github.com/1Password/connect) and make sure the Docker container starts at `http://localhost:8080`
-3. Make sure to update `OP_API_TOKEN` in the `.env` file.
+1. Start by copying `.env-sample` to `.env`, making sure to update its values including `OP_API_TOKEN` and `OP_TESTING_VAULT_ID`.
+2. Replace `/builds/product-research-and-development/devop/aws/automation/1password/connect-1password/.1password-credentials.json` with `~/.1password-credentials.json` on both lines in the `docker-compose.yml` file.
+3. Follow the [instructions to start Connect](https://github.com/1Password/connect) to create `~/.1password-credentials.json` and start the containers with `docker-compose up -d`.
 
 
 ## API usage
