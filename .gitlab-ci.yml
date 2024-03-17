@@ -82,6 +82,15 @@ tests:              # This job runs in the test stage.
     - 'curl -H "Accept: application/json" -H "Authorization: Bearer $OP_API_TOKEN" $OP_SERVER_URL/v1/vaults | jq'
     - echo "Running tests..."
     - cargo t -- --test-threads 1
+    - 'echo "Tests: Exporting results"'
+    - cargo install junitify
+    - cargo +nightly test -- --format=json -Z unstable-options --report-time | junitify -o test-results/
+  artifacts:
+    when: always
+    paths:
+      - test-results/*
+    reports:
+      junit: test-results/*
 
 formatting:
   stage: linting
