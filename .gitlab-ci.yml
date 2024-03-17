@@ -85,7 +85,7 @@ tests:              # This job runs in the test stage.
     - 'echo "Tests: Exporting results"'
     - rustup install $NIGHTLY_TOOLCHAIN
     - cargo install junitify
-    - cargo +nightly test -- --format=json -Z unstable-options --report-time | junitify -o test-results/
+    - cargo +$NIGHTLY_TOOLCHAIN test -- --format=json -Z unstable-options --report-time | junitify -o test-results/
   artifacts:
     when: always
     paths:
