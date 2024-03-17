@@ -135,6 +135,12 @@ impl Error {
     }
 }
 
+impl From<Box<dyn std::error::Error + Send + Sync>> for Error {
+    fn from(err: Box<dyn std::error::Error + Send + Sync>) -> Self {
+        Self::new(Kind::InternalError).with(err)
+    }
+}
+
 /// Wrapper type which contains a failed request's status code and body.
 #[derive(Debug)]
 pub struct RequestNotSuccessful {

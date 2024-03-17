@@ -28,3 +28,6 @@ serde_json = "^1.0"
 tokio = {version = "^1.0", features = ["full"]}
 uuid = {version = "0.8.2", features = ["serde", "v4"]}
 async-trait = "^0.1"
+
+[dev-dependencies]
+anyhow = "^1.0"
