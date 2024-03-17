@@ -98,3 +98,9 @@ fn get_test_client() -> (client::Client, String) {
 
     (client::Client::default(), test_vault_id)
 }
+
+// Not public API. Referenced by macro-generated code.
+#[doc(hidden)]
+pub mod __private {
+    use crate::error::Error;
+}
