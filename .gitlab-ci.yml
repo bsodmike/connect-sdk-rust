@@ -121,3 +121,12 @@ deploy-job:      # This job runs in the deploy stage.
   # environment: production
 
 
+job1:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "pipeline"
+  script: echo "This job runs in multi-project pipelines only"
+
+job2:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger"
+  script: echo "This job runs on triggers only"
