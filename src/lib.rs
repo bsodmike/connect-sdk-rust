@@ -1,7 +1,7 @@
 #![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
 #![forbid(unsafe_code)]
-#![deny(private_in_public, unstable_features)]
+#![deny(unstable_features)]
 #![warn(rust_2018_idioms, future_incompatible, nonstandard_style)]
 
 //! connect-1password is a Rust SDK for 1Password Connect.
@@ -52,7 +52,7 @@
 //!     tokio::time::sleep(std::time::Duration::new(SLEEP_DELAY, 0)).await;
 //!
 //!     items::remove(&client, &vaults[0].id, &new_item.id)
-//!         .await?;
+//!         .await;
 //!
 //!     Ok(())
 //! }
@@ -100,7 +100,6 @@
 //!     let (item, _) = items::get(&client, &vaults[0].id, &new_item.id).await?;
 //!     let fields: Vec<_> = item.fields.into_iter().filter(|r| r.value.is_some()).collect();
 //!     assert_eq!(fields.len(), 1);
-//!     dbg!(&fields);
 //!
 //!     let default_value = "".to_string();
 //!     let api_value = fields[0].value.as_ref().unwrap_or(&default_value);
@@ -154,7 +153,6 @@
 //!     let (item, _) = items::get(&client, &vaults[0].id, &new_item.id).await?;
 //!     let fields: Vec<_> = item.fields.into_iter().filter(|r| r.value.is_some()).collect();
 //!     assert_eq!(fields.len(), 1);
-//!     dbg!(&fields);
 //!
 //!     let default_value = "".to_string();
 //!     let api_value = fields[0].value.as_ref().unwrap_or(&default_value);
@@ -179,6 +177,12 @@ pub mod models;
 pub mod vaults;
 
 #[cfg(test)]
-fn get_test_client() -> client::Client {
-    client::Client::default()
+fn get_test_client() -> (client::Client, String) {
+    use dotenv::dotenv;
+    dotenv().ok();
+
+    let test_vault_id =
+        std::env::var("OP_TESTING_VAULT_ID").expect("1Password Vault ID for testing");
+
+    (client::Client::default(), test_vault_id)
 }

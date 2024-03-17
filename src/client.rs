@@ -1,6 +1,6 @@
 //! HTTP Client
 
-use crate::error::{Error, RequestNotSuccessful};
+use crate::error::{CustomError, Error, RequestNotSuccessful};
 use async_trait::async_trait;
 use dotenv::dotenv;
 use exponential_backoff::Backoff;
@@ -9,9 +9,9 @@ use hyper::{
     Response, StatusCode,
 };
 use hyper_rustls::HttpsConnector;
-use log::{debug, error};
+use log::debug;
 use serde_json::Value;
-use std::{fmt, ops, thread, time::Duration};
+use std::{error::Error as StdError, fmt, ops, thread, time::Duration};
 
 /// GET method
 pub const GET: Method = Method::GET;
@@ -59,8 +59,7 @@ impl HTTPClient for Client {
     where
         T: serde::de::DeserializeOwned + std::fmt::Debug,
     {
-        let api_key: &String = &self.api_key;
-
+        let api_key = &self.api_key;
         let method = match method {
             "GET" => GET,
             "POST" => POST,
@@ -69,52 +68,70 @@ impl HTTPClient for Client {
             &_ => GET,
         };
 
-        let resp = retry_with_backoff(self, &method, &api_key[..], endpoint, params, body).await?;
-        let status = resp.status();
+        match retry_with_backoff(self, &method, api_key.as_str(), endpoint, params, body).await {
+            Ok(resp_body) => {
+                let status = resp_body.status();
 
-        let data: (Result<T, Error>, Value) = hyper::body::to_bytes(resp.into_body())
-            .await
-            .map_err(Error::new_network_error)
-            .map(|mut bytes| {
-                dbg!(&bytes);
+                let data: (Result<T, Error>, Value) = hyper::body::to_bytes(resp_body.into_body())
+                    .await
+                    .map_err(Error::new_network_error)
+                    .map(|mut bytes| {
+                        dbg!(&bytes);
 
-                if &bytes.len() == &0 {
-                    bytes = hyper::body::Bytes::from("{}");
-                }
-                let json = serde_json::from_slice(&bytes).map_err(Error::new_parsing_error);
+                        if bytes.is_empty() {
+                            bytes = hyper::body::Bytes::from("{}");
+                        }
+                        let json = serde_json::from_slice(&bytes).map_err(Error::new_parsing_error);
 
-                (json, bytes)
-            })
-            .and_then(|data| {
-                let json = data.0;
-                let bytes = std::str::from_utf8(&data.1)?;
-                let json_raw: Value = dbg!(serde_json::from_str(bytes)?);
+                        (json, bytes)
+                    })
+                    .and_then(|data| {
+                        let json = data.0;
+                        let bytes = std::str::from_utf8(&data.1)?;
+                        let json_raw: Value = serde_json::from_str(bytes)?;
 
-                dbg!(&json);
-                dbg!(&json_raw);
+                        match status {
+                            StatusCode::OK => {}
+                            StatusCode::NO_CONTENT => {}
+                            _ => {
+                                debug!(
+                                    "Client error! Status: {}, JSON: {}",
+                                    status,
+                                    &bytes.to_string()
+                                );
 
-                match status {
-                    StatusCode::OK => {}
-                    StatusCode::NO_CONTENT => {}
-                    _ => {
-                        debug!(
-                            "Client error! Status: {}, JSON: {}",
-                            status,
-                            &bytes.to_string()
-                        );
+                                return Err(
+                                    RequestNotSuccessful::new(status, bytes.to_string()).into()
+                                );
+                            }
+                        };
 
-                        return Err(RequestNotSuccessful::new(status, bytes.to_string()).into());
-                    }
-                };
+                        Ok((json, json_raw))
+                    })?;
+                let decoded = data.0?;
+                let raw_json = data.1;
 
-                Ok((json, json_raw))
-            })?;
-        let decoded = data.0?;
-        let raw_json = data.1;
+                Ok((decoded, raw_json))
+            }
+            Err(err) => Err(Error::new_internal_error().with(err)),
+        }
+    }
+}
 
-        dbg!(&decoded);
+/// Create an instance by fetching defaults from the host ENV.
+///
+/// # Fields
+///
+/// - `OP_API_TOKEN`: provide the 1Password Connect API token.
+/// - `OP_SERVER_URL`: provide full URL to the host server, i.e. `http://localhost:8080`
+impl Default for Client {
+    fn default() -> Self {
+        dotenv().ok();
 
-        Ok((decoded, raw_json))
+        let token = std::env::var("OP_API_TOKEN").expect("1Password API token expected!");
+        let host = std::env::var("OP_SERVER_URL").expect("1Password Connect server URL expected!");
+
+        Self::new(&token, &host)
     }
 }
 
@@ -140,22 +157,6 @@ impl Client {
         }
     }
 
-    /// Create an instance by fetching defaults from the host ENV.
-    ///
-    /// # Fields
-    ///
-    /// - `OP_API_TOKEN`: provide the 1Password Connect API token.
-    /// - `OP_SERVER_URL`: provide full URL to the host server, i.e. `http://localhost:8080`
-    pub fn default() -> Self {
-        let token = std::env::var("OP_API_TOKEN").expect("1Password API token expected!");
-        let host = std::env::var("OP_SERVER_URL").expect("1Password Connect server URL expected!");
-
-        // .env to override settings in ENV
-        dotenv().ok();
-
-        Client::new(&token, &host)
-    }
-
     /// Returns the 1Password Connect API token.
     pub fn token(&self) -> String {
         self.api_key.clone()
@@ -164,6 +165,7 @@ impl Client {
 
 struct RetryErrors<'a>(pub(crate) &'a mut Vec<String>);
 
+#[allow(clippy::manual_try_fold)]
 impl<'a> fmt::Display for RetryErrors<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.iter().fold(Ok(()), |result, error_msg| {
@@ -180,15 +182,15 @@ impl ops::Deref for RetryErrors<'_> {
     }
 }
 
-/// Attempt exponential backoff when re-attempting requests to the Melissa service.
-async fn retry_with_backoff(
+/// Attempt exponential backoff when re-attempting requests.
+async fn retry_with_backoff<'a>(
     client: &Client,
     method: &hyper::Method,
     api_key: &str,
     endpoint: &str,
     params: &[(&str, &str)],
     body: Option<String>,
-) -> Result<Response<Body>, Error> {
+) -> Result<Response<Body>, impl StdError> {
     let retries = RETRY_ATTEMPTS;
     let min = Duration::from_millis(100);
     let max = Duration::from_secs(20);
@@ -226,14 +228,18 @@ async fn retry_with_backoff(
         }
     }
 
-    let err = if let Some(val) = retry_errors.pop() {
-        val
-    } else {
-        error!("Unable to unwrap error");
-        return Err(Error::new_internal_error());
+    let errors: Vec<&hyper::Error> = retry_errors.iter().collect();
+    let mut err_vec: Vec<String> = vec![];
+    for (index, item) in errors.iter().enumerate() {
+        err_vec.push(format!("Error {}: {}", index, item))
+    }
+    if !err_vec.is_empty() {
+        let error_text = err_vec.join(", ");
+        return Err::<Response<Body>, CustomError>(CustomError::new(error_text.as_str()));
     };
 
-    Err(Error::new_retry_error(err))
+    Err::<Response<Body>, CustomError>(Error::new_internal_error().into())
+    // Err(Error::new_internal_error())
 }
 
 fn url_encode(params: &[(&str, &str)]) -> String {

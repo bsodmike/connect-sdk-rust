@@ -1,0 +1,10 @@
+[tasks.ci]
+dependencies = ["check-format", "check-clippy"]
+
+[tasks.check-format]
+command = "cargo"
+args = ["fmt", "--", "--check"]
+
+[tasks.check-clippy]
+command = "cargo"
+args = ["clippy", "--no-deps", "--all", "--all-targets", "--all-features"]

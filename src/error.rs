@@ -9,6 +9,9 @@ use std::{
     str::Utf8Error,
 };
 
+/// Wrapper Trait over [`std::error::Error`]
+pub trait ErrorTrait: std::error::Error {}
+
 /// A simple type alias so as to DRY.
 pub type ConnectResult<T> = Result<T, Error>;
 
@@ -67,16 +70,17 @@ impl Error {
         self
     }
 
+    #[allow(dead_code)]
+
     pub(crate) fn find_source<E: StdError + 'static>(&self) -> Option<&E> {
         let mut cause = self.source();
         while let Some(err) = cause {
-            if let Some(ref typed) = err.downcast_ref() {
+            if let Some(typed) = err.downcast_ref() {
                 return Some(typed);
             }
             cause = err.source();
         }
 
-        // else
         None
     }
 
@@ -88,6 +92,7 @@ impl Error {
         Error::new(Kind::ParsingError).with(cause)
     }
 
+    #[allow(dead_code)]
     pub(super) fn new_retry_error<E: Into<Cause>>(cause: E) -> Self {
         Error::new(Kind::RetryError).with(cause)
     }
@@ -167,7 +172,7 @@ impl ConnectAPIError {
     /// Create a new unsuccessful request error.
     pub fn new(status: String, message: &str) -> Self {
         Self {
-            status: status.to_string(),
+            status,
             message: message.to_string(),
         }
     }
@@ -205,6 +210,25 @@ impl Display for CustomError {
     }
 }
 
+impl From<hyper::http::Error> for CustomError {
+    fn from(err: hyper::http::Error) -> Self {
+        Self::new(err.to_string().as_str())
+    }
+}
+
+impl From<InvalidHeaderValue> for CustomError {
+    fn from(_: InvalidHeaderValue) -> Self {
+        Self::new("InvalidHeaderValue")
+    }
+}
+
+impl From<Error> for CustomError {
+    fn from(err: Error) -> Self {
+        Self::new(format!("Internal error: {}", err).as_str())
+    }
+}
+
+#[allow(dead_code)]
 #[derive(Debug)]
 pub(super) enum Kind {
     CustomError(CustomError),
@@ -319,7 +343,14 @@ impl From<serde_json::Error> for Error {
     }
 }
 
+impl From<CustomError> for Error {
+    fn from(err: CustomError) -> Self {
+        Error::new(Kind::CustomError(err))
+    }
+}
+
 /// Defines an error from the 1Password Connect API
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct OPError {
     pub(super) status_code: Option<u16>,
@@ -335,7 +366,7 @@ pub fn process_connect_error_response(err_message: String) -> Result<OPError, Er
         captures
             .iter() // All the captured groups
             .skip(1) // Skipping the complete match
-            .flat_map(|c| c) // Ignoring all empty optional matches
+            .flatten() // Ignoring all empty optional matches
             .map(|c| c.as_str()) // Grab the original strings
             .collect::<Vec<_>>() // Create a vector
     });
@@ -343,7 +374,7 @@ pub fn process_connect_error_response(err_message: String) -> Result<OPError, Er
     dbg!(&captures);
 
     // Match against the captured values as a slice
-    let status_code: Option<u16> = match captures.as_ref().map(|c| c.as_slice()) {
+    let status_code: Option<u16> = match captures.as_deref() {
         Some(["StatusCode", x]) => {
             let x = x.parse().expect("can't parse number");
             Some(x)

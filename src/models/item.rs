@@ -1,10 +1,6 @@
-use std::ascii::AsciiExt;
-
-use crate::error::{CustomError, Error};
+use crate::error::{CustomError, ErrorTrait};
 use chrono::{DateTime, Utc};
-use hyper::StatusCode;
-use log::debug;
-use regex::Regex;
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -75,10 +71,10 @@ pub enum FieldType {
     Concealed,
 }
 
-impl Into<String> for FieldType {
-    fn into(self) -> String {
-        let value = match self {
-            Self::Concealed => "CONCEALED",
+impl From<FieldType> for String {
+    fn from(val: FieldType) -> Self {
+        let value = match val {
+            FieldType::Concealed => "CONCEALED",
         };
 
         value.to_string()
@@ -120,6 +116,12 @@ impl SectionID {
     }
 }
 
+impl Default for SectionID {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// This is a FullItem
 #[derive(Debug, Deserialize, Serialize)]
 pub struct FullItem {
@@ -144,7 +146,7 @@ pub struct FullItem {
 /// Defines a default interface
 pub trait DefaultItem {
     /// Execute the builder
-    fn build(&self) -> Result<FullItem, Box<dyn std::error::Error + Send + Sync>>;
+    fn build(&self) -> Result<FullItem, Box<dyn ErrorTrait + Send + Sync>>;
 }
 
 /// Defines an interface for a Login item
@@ -200,17 +202,18 @@ pub enum ItemCategory {
 }
 
 impl ItemCategory {
+    #[allow(dead_code)]
     fn default() -> Self {
         Self::ApiCredential
     }
 }
 
-impl Into<String> for ItemCategory {
-    fn into(self) -> String {
-        let value = match self {
-            Self::ApiCredential => "API_CREDENTIAL",
-            Self::Login => "LOGIN",
-            Self::Password => "PASSWORD",
+impl From<ItemCategory> for String {
+    fn from(val: ItemCategory) -> Self {
+        let value = match val {
+            ItemCategory::ApiCredential => "API_CREDENTIAL",
+            ItemCategory::Login => "LOGIN",
+            ItemCategory::Password => "PASSWORD",
         };
 
         value.to_string()
@@ -236,6 +239,7 @@ impl ItemBuilder {
         }
     }
 
+    #[allow(dead_code)]
     // FIXME: This needs testing to ensure the OTP secret is applied correctly
     pub(crate) fn add_otp(mut self, secret: &str) -> Self {
         let section = SectionID::new();
@@ -258,7 +262,7 @@ impl ItemBuilder {
 }
 
 impl DefaultItem for ItemBuilder {
-    fn build(&self) -> Result<FullItem, Box<dyn std::error::Error + Send + Sync>> {
+    fn build(&self) -> Result<FullItem, Box<dyn ErrorTrait + Send + Sync>> {
         Ok(FullItem {
             title: self.title.clone(),
             category: self.category.clone(),
@@ -296,7 +300,7 @@ impl LoginItem for ItemBuilder {
         let field: FieldObject = FieldObject {
             value: password.is_empty().then(|| password.to_string()),
             purpose: Some("PASSWORD".to_string()),
-            generate: password.is_empty().then(|| true),
+            generate: password.is_empty().then_some(true),
             label: None,
             r#type: None,
             section: None,
